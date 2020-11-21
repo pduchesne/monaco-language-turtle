@@ -1,0 +1,27 @@
+{
+  "name": "monaco-language-turtle",
+  "version": "0.0.1",
+  "description": "Turtle support for Monaco Editor",
+  "author": {
+    "name": "Philippe Duchesne",
+    "email": "pduchesne@gmail.com"
+  },
+  "scripts": {
+    "build": "yarn clean && yarn build-tsc",
+    "build-tsc": "tsc -b .",
+    "test": "jest --verbose --passWithNoTests",
+    "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "typings": "dist/index.d.ts",
+  "jest": {},
+  "devDependencies": {
+    "antlr4ts-cli": "^0.5.0-alpha.3"
+  },
+  "dependencies": {
+    "antlr4ts": "^0.5.0-alpha.3",
+    "monaco-editor": "^0.21.2",
+    "rdflib": "^2.1.3"
+  }
+}

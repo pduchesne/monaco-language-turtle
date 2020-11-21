@@ -1,0 +1,36 @@
+{
+  "include": [
+    "src"
+  ],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "checkJs": true,
+    "allowJs": true,
+    "declaration": true,
+    //"declarationDir": "dist/types",   // let the type files go alongside the transpiled js files
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "target": "es2019",
+    "sourceMap": true,
+    "preserveSymlinks": true,
+    "module": "commonjs",
+    "strictNullChecks": true,
+    "alwaysStrict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noUnusedLocals": true,
+    //"allowSyntheticDefaultImports": true,
+
+    //"lib": ["es6"], // target es6 includes dom - declaring lib here overrides that
+    "esModuleInterop": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
