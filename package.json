@@ -10,7 +10,8 @@
     "build": "yarn clean && yarn build-tsc",
     "build-tsc": "tsc -b .",
     "test": "jest --verbose --passWithNoTests",
-    "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
+    "clean": "rm -rf dist/ tsconfig.tsbuildinfo",
+    "antlr4ts": "antlr4ts ./turtle.g4 -o ./src/turtle/ANTLR"
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
