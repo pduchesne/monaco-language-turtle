@@ -219,7 +219,8 @@ monaco.languages.registerHoverProvider('turtle', {
         //{ value: `${tokenText}` }
       )
 
-      if (typeNames.includes(DV('RecommandationExplain').value) || typeNames.includes(SDO('Recommendation').value)) {
+        // TODO fix Recommandation into Recommendation everywhere
+      if (typeNames.includes(DV('RecommandationExplain').value) || typeNames.includes(SDO('Recommandation').value) || typeNames.includes(SDO('Recommendation').value)) {
         const rank = rdfGraph.anyValue(rdflib.namedNode(iri), DV('rank'));
         const weight = rdfGraph.anyValue(rdflib.namedNode(iri), DV('weight'));
         contents.push(
