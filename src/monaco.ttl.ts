@@ -4,6 +4,7 @@ import { WorkerManager } from "./WorkerManager";
 import DiagnosticsAdapter, { WorkerAccessor } from "./DiagnosticsAdapter";
 import { CancellationToken } from "monaco-editor";
 import * as rdflib from 'rdflib';
+import { NamedNode } from "rdflib";
 
 // Complete how-to on how to write a custom monaco language at
 // https://betterprogramming.pub/create-a-custom-web-editor-using-typescript-react-antlr-and-monaco-editor-part-1-2f710c69c18c
@@ -54,7 +55,7 @@ export const monarchTurtleLanguage: IMonarchLanguage = {
   tokenizer: {
     root: [
       // resource indicators
-      [/<[^\s\u00a0>]*>?/, 'iri'],
+      [/<([^\s\u00a0>])*>?/, 'iri'],
       //[/<([^<>])*>/ , 'iri'],
 
       // strings
@@ -149,7 +150,16 @@ monaco.languages.register({
 });
 
 
+const DV = rdflib.Namespace('https://api.datavillage.me/');
 const SDO = rdflib.Namespace('https://schema.org/');
+const RDFS = rdflib.Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#');
+const GConsent = rdflib.Namespace('https://w3id.org/GConsent#');
+
+monaco.languages.registerLinkProvider({language: 'turtle', exclusive: true}, {
+  provideLinks(model, token) {
+    return null;
+  }
+})
 
 monaco.languages.registerHoverProvider('turtle', {
   provideHover: function (model, position, token: CancellationToken) {
@@ -179,11 +189,14 @@ monaco.languages.registerHoverProvider('turtle', {
     const contents: monaco.IMarkdownString[] = [];
 
     if (hoveredToken.type == "prefix.turtle" ) {
-
+      return null;
+      /*
       contents.push(
         { value: `## ${tokenText}` },
         { value: `${rdfGraph.namespaces[tokenText.split(':')[0]]}` },
       )
+
+       */
     }
     else if (hoveredToken.type == "prefixedname.turtle" || hoveredToken.type == "iri.turtle") {
 
@@ -192,21 +205,64 @@ monaco.languages.registerHoverProvider('turtle', {
         const [prefix, name] = tokenText.split(':');
         iri = rdfGraph.namespaces[prefix]+name;
       } else {
-        iri = tokenText;
+        iri = tokenText.substring(1, tokenText.length-1);
       }
 
-      const name = rdfGraph.anyValue(rdflib.namedNode(iri), SDO('name')) ;
+      const name = rdfGraph.anyValue(rdflib.namedNode(iri), SDO('name')) || rdfGraph.anyValue(rdflib.namedNode(iri), SDO('title'));
+      const types = [...rdfGraph.each(rdflib.namedNode(iri), RDFS('type')), ...rdfGraph.each(rdflib.namedNode(iri), SDO('additionalType'))]
+
+      const typeNames = types.map(n => n.value);
 
       contents.push(
-        { value: `## ${name}` },
-        { value: `${hoveredToken.type}` },
-        { value: `${tokenText}` }
+        { value: `## ${name || iri}` },
+        { value: `${typeNames.join(", ")}` },
+        //{ value: `${tokenText}` }
       )
+
+      if (typeNames.includes(DV('RecommandationExplain').value) || typeNames.includes(SDO('Recommendation').value)) {
+        const rank = rdfGraph.anyValue(rdflib.namedNode(iri), DV('rank'));
+        const weight = rdfGraph.anyValue(rdflib.namedNode(iri), DV('weight'));
+        contents.push(
+          { value: `Rank ${rank}` },
+          { value: `Weight ${weight}` }
+        )
+      } else if (typeNames.includes(GConsent('Consent').value)) {
+        const purpose = rdfGraph.anyValue(rdflib.namedNode(iri), GConsent('purpose'));
+        contents.push(
+          { value: `${purpose}` },
+        )
+      } else if (typeNames.includes(SDO('MusicAlbum').value)) {
+
+        /*
+        const query = rdflib.SPARQLToQuery(`SELECT ?artist WHERE { <${iri}> <${SDO('byArtist').value}>/<${SDO('name').value}> ?artist }.`, false, rdfGraph);
+        const result$ = new Promise<Term | null>( (resolve, reject) => {
+          query && rdfGraph.query(query, bindings => {
+            resolve(bindings['artist'])
+            // TODO what if rejected ?
+          });
+        })
+        const artist = await result$;
+        */
+        const artist = rdfGraph.any(rdflib.namedNode(iri), SDO('byArtist'));
+        const artistName = artist && rdfGraph.anyValue(artist as NamedNode, SDO('name'));
+
+        contents.push(
+          { value: `by ${artistName}` },
+        )
+      } else {
+        // if unknown type and no name to display, skip the popup
+        if (!name) return null;
+      }
+
     } else {
+      /*
       contents.push(
         { value: `${hoveredToken.type}` },
         { value: `${tokenText}` }
       )
+
+       */
+      return null;
     }
 
     return {
