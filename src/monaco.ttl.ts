@@ -223,13 +223,19 @@ monaco.languages.registerHoverProvider('turtle', {
         const rank = rdfGraph.anyValue(rdflib.namedNode(iri), DV('rank'));
         const weight = rdfGraph.anyValue(rdflib.namedNode(iri), DV('weight'));
         contents.push(
-          { value: `Rank ${rank}` },
-          { value: `Weight ${weight}` }
+          { value: `Rank **${rank}**` },
+          { value: `Weight **${weight}**` }
+        )
+      } if (typeNames.includes(SDO('Action').value)) {
+        const object = rdfGraph.any(rdflib.namedNode(iri), SDO('object'));
+        const objectName = object && rdfGraph.anyValue(object as NamedNode, SDO('name'));
+        contents.push(
+          { value: `Action on **${objectName}**` },
         )
       } else if (typeNames.includes(GConsent('Consent').value)) {
         const purpose = rdfGraph.anyValue(rdflib.namedNode(iri), GConsent('purpose'));
         contents.push(
-          { value: `${purpose}` },
+          { value: `**${purpose}**` },
         )
       } else if (typeNames.includes(SDO('MusicAlbum').value)) {
 
@@ -247,7 +253,7 @@ monaco.languages.registerHoverProvider('turtle', {
         const artistName = artist && rdfGraph.anyValue(artist as NamedNode, SDO('name'));
 
         contents.push(
-          { value: `by ${artistName}` },
+          { value: `by **${artistName}**` },
         )
       } else {
         // if unknown type and no name to display, skip the popup
