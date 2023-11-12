@@ -238,6 +238,20 @@ monaco.languages.registerHoverProvider('turtle', {
         contents.push(
           { value: `**${purpose}**` },
         )
+      } else if (typeNames.includes(SDO('MusicEvent').value)) {
+        const startDate = rdfGraph.anyValue(rdflib.namedNode(iri), SDO('startDate'));
+        const performer = rdfGraph.any(rdflib.namedNode(iri), SDO('performer'));
+        const performerName = performer && rdfGraph.anyValue(performer as NamedNode, SDO('name'));
+        const location = rdfGraph.any(rdflib.namedNode(iri), SDO('location'));
+        const locationName = location && rdfGraph.anyValue(location as NamedNode, SDO('name'));
+        contents.push(
+          { value: `Artist **${performerName}**` },
+          { value: `Location **${locationName}**` },
+        )
+        if (startDate)
+          contents.push(
+            { value: `Date **${new Date(startDate).toLocaleString()}**` },
+          )
       } else if (typeNames.includes(SDO('MusicAlbum').value)) {
 
         /*
