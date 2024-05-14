@@ -2,15 +2,15 @@ import * as monaco from "monaco-editor";
 import IMonarchLanguage = monaco.languages.IMonarchLanguage;
 import { WorkerManager } from "./WorkerManager";
 import DiagnosticsAdapter, { WorkerAccessor } from "./DiagnosticsAdapter";
-import { CancellationToken } from "monaco-editor";
+import {CancellationToken, editor} from "monaco-editor";
 import * as rdflib from 'rdflib';
 import { NamedNode } from "rdflib";
+import IStandaloneThemeData = editor.IStandaloneThemeData;
 
 // Complete how-to on how to write a custom monaco language at
 // https://betterprogramming.pub/create-a-custom-web-editor-using-typescript-react-antlr-and-monaco-editor-part-1-2f710c69c18c
 
-
-monaco.editor.defineTheme('turtleTheme', {
+const turtleTheme: IStandaloneThemeData = {
   base: 'vs',
   inherit: false,
   rules: [
@@ -28,7 +28,7 @@ monaco.editor.defineTheme('turtleTheme', {
   colors: {
     'editor.foreground': '#000000'
   }
-});
+};
 
 
 // on writing on custom token provider : https://github.com/microsoft/monaco-editor/issues/361
@@ -136,32 +136,18 @@ export const monarchTurtleLanguage: IMonarchLanguage = {
 }
 
 
-// register file types and extension for a languageId
-monaco.languages.register({
-  id: 'turtle',
-  extensions: [
-    '.ttl',
-    '.nquads',
-    '.n3'
-  ],
-  //firstLine: '(\\<\\?xml.*)|(\\<svg)|(\\<\\!doctype\\s+svg)',
-  aliases: ['turtle', 'ttl'],
-  mimetypes: ['text/turtle', 'text/n3', 'application/n-triples', 'application/n-quads'],
-});
-
-
 const DV = rdflib.Namespace('https://api.datavillage.me/');
 const SDO = rdflib.Namespace('https://schema.org/');
 const RDFS = rdflib.Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#');
 const GConsent = rdflib.Namespace('https://w3id.org/GConsent#');
 
-monaco.languages.registerLinkProvider({language: 'turtle', exclusive: true}, {
+const linkProvider: monaco.languages.LinkProvider = {
   provideLinks(model, token) {
     return null;
   }
-})
+}
 
-monaco.languages.registerHoverProvider('turtle', {
+const createHoverProvider = (monacoInstance: typeof monaco): monaco.languages.HoverProvider => ({
   provideHover: function (model, position, token: CancellationToken) {
     //var word = model.getWordAtPosition(position);
 
@@ -218,29 +204,29 @@ monaco.languages.registerHoverProvider('turtle', {
       const typeNames = types.map(n => n.value);
 
       contents.push(
-        { value: `## ${name || iri}` },
-        { value: `${typeNames.join(", ")}` },
-        //{ value: `${tokenText}` }
+          { value: `## ${name || iri}` },
+          { value: `${typeNames.join(", ")}` },
+          //{ value: `${tokenText}` }
       )
 
-        // TODO fix Recommandation into Recommendation everywhere
+      // TODO fix Recommandation into Recommendation everywhere
       if (typeNames.includes(DV('RecommandationExplain').value) || typeNames.includes(SDO('Recommandation').value) || typeNames.includes(SDO('Recommendation').value)) {
         const rank = rdfGraph.anyValue(rdflib.namedNode(iri), DV('rank'));
         const weight = rdfGraph.anyValue(rdflib.namedNode(iri), DV('weight'));
         contents.push(
-          { value: `Rank **${rank}**` },
-          { value: `Weight **${weight}**` }
+            { value: `Rank **${rank}**` },
+            { value: `Weight **${weight}**` }
         )
       } if (typeNames.includes(SDO('Action').value)) {
         const object = rdfGraph.any(rdflib.namedNode(iri), SDO('object'));
         const objectName = object && rdfGraph.anyValue(object as NamedNode, SDO('name'));
         contents.push(
-          { value: `Action on **${objectName}**` },
+            { value: `Action on **${objectName}**` },
         )
       } else if (typeNames.includes(GConsent('Consent').value)) {
         const purpose = rdfGraph.anyValue(rdflib.namedNode(iri), GConsent('purpose'));
         contents.push(
-          { value: `**${purpose}**` },
+            { value: `**${purpose}**` },
         )
       } else if (typeNames.includes(SDO('MusicEvent').value)) {
         const startDate = rdfGraph.anyValue(rdflib.namedNode(iri), SDO('startDate'));
@@ -249,12 +235,12 @@ monaco.languages.registerHoverProvider('turtle', {
         const location = rdfGraph.any(rdflib.namedNode(iri), SDO('location'));
         const locationName = location && rdfGraph.anyValue(location as NamedNode, SDO('name'));
         contents.push(
-          { value: `Artist **${performerName}**` },
-          { value: `Location **${locationName}**` },
+            { value: `Artist **${performerName}**` },
+            { value: `Location **${locationName}**` },
         )
         if (startDate)
           contents.push(
-            { value: `Date **${new Date(startDate).toLocaleString()}**` },
+              { value: `Date **${new Date(startDate).toLocaleString()}**` },
           )
       } else if (typeNames.includes(SDO('MusicAlbum').value)) {
 
@@ -272,7 +258,7 @@ monaco.languages.registerHoverProvider('turtle', {
         const artistName = artist && rdfGraph.anyValue(artist as NamedNode, SDO('name'));
 
         contents.push(
-          { value: `by **${artistName}**` },
+            { value: `by **${artistName}**` },
         )
       } else {
         // if unknown type and no name to display, skip the popup
@@ -295,18 +281,14 @@ monaco.languages.registerHoverProvider('turtle', {
       contents
     }
   }
-});
+})
 
-
-
-
-
-monaco.languages.onLanguage('turtle', () => {
+export const onTurtleCb = (monacoInstance: typeof monaco) => () => {
 // use either setTokensProvider or setMonarchTokensProvider
 // cf https://github.com/microsoft/monaco-editor/issues/361
-  monaco.languages.setMonarchTokensProvider('turtle', monarchTurtleLanguage)
+  monacoInstance.languages.setMonarchTokensProvider('turtle', monarchTurtleLanguage)
 
-  monaco.languages.setLanguageConfiguration('turtle', {
+  monacoInstance.languages.setLanguageConfiguration('turtle', {
     autoClosingPairs: [
       { open: "'", close: "'", notIn: ['string'] },
       { open: '"', close: '"', notIn: ['string'] },
@@ -324,8 +306,7 @@ monaco.languages.onLanguage('turtle', () => {
   };
   //Call the errors provider
   new DiagnosticsAdapter(worker);
-});
-
+};
 
 /*
 monaco.languages.registerTokensProviderFactory('turtle', {
@@ -335,3 +316,28 @@ monaco.languages.registerTokensProviderFactory('turtle', {
   }
 });
  */
+
+export function registerTurtle(monacoInstance: typeof monaco) {
+  if (!monacoInstance.languages.getLanguages().some(({ id }) => id === 'turtle')) {
+    monacoInstance.editor.defineTheme('turtleTheme', turtleTheme);
+
+    // register file types and extension for a languageId
+    monacoInstance.languages.register({
+      id: 'turtle',
+      extensions: [
+        '.ttl',
+        '.nquads',
+        '.n3'
+      ],
+      //firstLine: '(\\<\\?xml.*)|(\\<svg)|(\\<\\!doctype\\s+svg)',
+      aliases: ['turtle', 'ttl'],
+      mimetypes: ['text/turtle', 'text/n3', 'application/n-triples', 'application/n-quads'],
+    });
+
+    monacoInstance.languages.registerLinkProvider({language: 'turtle', exclusive: true}, linkProvider);
+    monacoInstance.languages.registerHoverProvider('turtle', createHoverProvider(monacoInstance));
+    monacoInstance.languages.onLanguage('turtle', onTurtleCb(monacoInstance));
+  }
+}
+
+registerTurtle(monaco);

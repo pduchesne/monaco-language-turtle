@@ -7,16 +7,16 @@
     "email": "pduchesne@gmail.com"
   },
   "scripts": {
-    "build": "yarn clean && yarn build-tsc && yarn build-rollup",
+    "build": "yarn clean && yarn build-tsc",
     "build-tsc": "tsc -b .",
     "build-rollup": "rollup -c",
     "test": "jest --verbose --passWithNoTests",
     "clean": "rm -rf dist/ tsconfig.tsbuildinfo",
     "antlr4ts": "antlr4ts ./turtle.g4 -o ./src/turtle/ANTLR"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "typings": "dist/index.d.ts",
+  "main": "dist/monaco.ttl.js",
+  "module": "dist/monaco.ttl.mjs",
+  "types": "dist/monaco.ttl.d.ts",
   "jest": {},
   "devDependencies": {
     "@rollup/plugin-commonjs": "^21.0.2",
@@ -27,7 +27,7 @@
     "tsc": "^2.0.4",
     "ttypescript": "^1.5.15",
     "typescript": "^4.6.2",
-    "monaco-editor": "^0.33.0"
+    "monaco-editor": "0.33.0"
   },
   "dependencies": {
     "antlr4ts": "^0.5.0-alpha.4",
