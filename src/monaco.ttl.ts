@@ -167,15 +167,19 @@ monaco.languages.registerHoverProvider('turtle', {
 
     const rdfGraph: rdflib.Store = (model as any).rdfGraph;
 
-    const lineTokens = (model as any).getLineTokens(position.lineNumber);
-    const hoveredTokenIdx = lineTokens.findTokenIndexAtOffset(position.column-1)
-    const hoveredTokenStartOffset = lineTokens.getStartOffset(hoveredTokenIdx);
-    const hoveredTokenEndOffset = lineTokens.getEndOffset(hoveredTokenIdx);
-
     //let textUntilPosition = model.getValueInRange({startLineNumber: 1, startColumn: 1, endLineNumber: position.lineNumber, endColumn: position.column})
     let lineContent = model.getLineContent(position.lineNumber);
-    const parsedTokens = monaco.editor.tokenize(lineContent, 'turtle');
-    const hoveredToken = parsedTokens[0][hoveredTokenIdx];
+    const lineTokens = monacoInstance.editor.tokenize(lineContent, 'turtle')[0];
+
+    //const lineTokens = (model as any).getLineTokens(position.lineNumber);
+
+    const hoveredTokenIdx = lineTokens.findIndex( (t, idx) => {
+      return t.offset <= position.column-1 && (idx >= lineTokens.length-1 || position.column-1 < lineTokens[idx+1].offset)
+    });
+    const hoveredTokenStartOffset = lineTokens[hoveredTokenIdx].offset;
+    const hoveredTokenEndOffset = lineTokens[hoveredTokenIdx+1] ? lineTokens[hoveredTokenIdx+1].offset : lineContent.length;
+    const hoveredToken = lineTokens[hoveredTokenIdx];
+
 
     const tokenText = lineContent.substring(hoveredTokenStartOffset, hoveredTokenEndOffset)
 
