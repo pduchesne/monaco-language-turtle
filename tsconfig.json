@@ -23,7 +23,6 @@
     "strictBindCallApply": true,
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
-    "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
     //"allowSyntheticDefaultImports": true,
 
