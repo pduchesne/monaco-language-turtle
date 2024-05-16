@@ -22,7 +22,7 @@
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "antlr4ts-cli": "^0.5.0-alpha.4",
-    "monaco-editor": "0.33.0",
+    "monaco-editor": "0.48.0",
     "rollup": "^4.17.2",
     "rollup-plugin-typescript2": "^0.36.0",
     "tsc": "^2.0.4",
@@ -34,6 +34,6 @@
     "rdflib": "^2.2.35"
   },
   "peerDependencies": {
-    "monaco-editor": "^0.33.0"
+    "monaco-editor": "^0.48.0"
   }
 }
