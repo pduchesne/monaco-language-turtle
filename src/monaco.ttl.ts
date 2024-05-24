@@ -158,7 +158,7 @@ export const monarchTurtleLanguage: IMonarchLanguage = {
 
 
 const DV = rdflib.Namespace('https://api.datavillage.me/');
-const SDO = rdflib.Namespace('http://schema.org/');
+const SDO = rdflib.Namespace('https://schema.org/');
 const RDFS = rdflib.Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#');
 const GConsent = rdflib.Namespace('https://w3id.org/GConsent#');
 
@@ -361,7 +361,9 @@ export function registerTurtle(monacoInstance: typeof monaco) {
       extensions: [
         '.ttl',
         '.nquads',
-        '.n3'
+        '.n3',
+        '.nq',
+        '.nt'
       ],
       //firstLine: '(\\<\\?xml.*)|(\\<svg)|(\\<\\!doctype\\s+svg)',
       aliases: ['turtle', 'ttl'],
